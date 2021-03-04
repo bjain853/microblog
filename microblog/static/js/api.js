@@ -33,36 +33,36 @@ let api = (function(){
     
     let getUsername = function(){
         return document.cookie.replace(/(?:(?:^|.*;\s*)username\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    }
+    };
     
     function notifyUserListeners(username){
         userListeners.forEach(function(listener){
             listener(username);
         });
-    };
+    }
     
     module.onUserUpdate = function(listener){
         userListeners.push(listener);
         listener(getUsername());
-    }
+    };
     
     module.signin = function(username, password){
         send("POST", "/signin/", {username, password}, function(err, res){
              if (err) return notifyErrorListeners(err);
              notifyUserListeners(getUsername());
         });
-    }
+    };
     
     module.signup = function(username, password){
         send("POST", "/signup/", {username, password}, function(err, res){
              if (err) return notifyErrorListeners(err);
              notifyUserListeners(getUsername());
         });
-    }
+    };
 
     let getMessages = function(page, callback){
         send("GET", "/api/messages/?page=" + page, null, callback);
-    }
+    };
     
     let messageListeners = [];
     
@@ -81,7 +81,7 @@ let api = (function(){
             if (err) return notifyErrorListeners(err);
             listener(messages);
         });
-    }
+    };
     
     
     module.addMessage = function(content){
@@ -89,14 +89,14 @@ let api = (function(){
              if (err) return notifyErrorListeners(err);
              notifyMessageListeners();
         });
-    }
+    };
     
     module.deleteMessage = function(messageId){
         send("DELETE", "/api/messages/" + messageId + "/", null, function(err, res){
              if (err) return notifyErrorListeners(err);
              notifyMessageListeners();
         });
-    }
+    };
     
     let voteListeners = [];
     
@@ -108,21 +108,21 @@ let api = (function(){
     
     module.onVoteUpdate = function(listener){
         voteListeners.push(listener);
-    }
+    };
     
     module.upvoteMessage = function(messageId){
         send("PATCH", "/api/messages/" + messageId + "/", {action: 'upvote'}, function(err, res){
              if (err) return notifyErrorListeners(err);
              notifyVoteListeners(res);
         });
-    }
+    };
     
     module.downvoteMessage = function(messageId){
         send("PATCH", "/api/messages/" + messageId + "/", {action: 'downvote'}, function(err, res){
              if (err) return notifyErrorListeners(err);
              notifyVoteListeners(res);
         });
-    }
+    };
     
     // (function refresh(){
     //     setTimeout(function(e){

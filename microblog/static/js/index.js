@@ -59,5 +59,5 @@
             api.addMessage(content);
         });    
     });
-}())
+}());
 
