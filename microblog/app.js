@@ -9,12 +9,14 @@ const bodyParser = require('body-parser');
 const cookie = require('cookie');
 const session = require('express-session');
 const https = require('https');
+const Datastore = require('nedb');
+
+
 
 app.use(bodyParser.json());
 app.disable('x-powered-by');
 app.use(helmet());
 
-const Datastore = require('nedb');
 let users = new Datastore({ filename: 'db/users.db', autoload: true });
 let messages = new Datastore({
 	filename: path.join(__dirname, 'db', 'messages.db'),
@@ -186,15 +188,7 @@ app.get('/api/messages/', function(req, res, next) {
 app.patch(
 	'/api/messages/:id/',
 	isAuthenticated,
-	validator.param('id').custom(function(id, { req }) {
-		messages.findOne({ _id: id }, function(err, msg) {
-			if (err || !msg) throw new Error('Invalid Id provided');
-			else return true;
-		});
-	}),
 	function(req, res, next) {
-		const errors = validator.validationResult(req);
-		if (!errors.isEmpty()) return res.status(400).json('Bad id given');
 		if ([ 'upvote', 'downvote' ].indexOf(req.body.action) == -1)
 			return res.status(400).end('unknown action' + req.body.action);
 		messages.findOne({ _id: req.params.id }, function(err, message) {
@@ -214,14 +208,7 @@ app.patch(
 app.delete(
 	'/api/messages/:id/',
 	isAuthenticated,
-	validator.param('id').custom(function(id, { req }) {
-		messages.findOne({ _id: id }, function(err, msg) {
-			if (err || !msg) throw new Error('Invalid Id provided');
-			else return true;
-		});
-	}),
 	function(req, res) {
-		if (req.error) return res.status(400).json(req.error.message);
 		messages.findOne({ _id: req.params.id }, function(err, message) {
 			if (err) return res.status(500).end(err);
 			if (!message) return res.status(404).end('Message id #' + req.params.id + ' does not exists');
